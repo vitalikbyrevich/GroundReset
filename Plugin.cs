@@ -6,7 +6,6 @@ using ServerSync;
 using System;
 using System.IO;
 using System.Threading.Tasks;
-using UnityEngine;
 
 #pragma warning disable CS8632
 namespace GroundReset
@@ -58,7 +57,6 @@ namespace GroundReset
         internal static DateTime lastReset;
 
 
-        internal static bool isKeyPrtesed = false;
 
         private void Awake()
         {
@@ -67,7 +65,7 @@ namespace GroundReset
             #region config
             Config.SaveOnConfigSet = false;
 
-            timeInMinutesConfig = config("General", "TheTriggerTime", 4320f, new ConfigDescription("", new AcceptableValueRange<float>(15f, 312480)));
+            timeInMinutesConfig = config("General", "TheTriggerTime", 4320f, new ConfigDescription("", new AcceptableValueRange<float>(0.1f, 312480)));
             timePassedConfig = config("DO NOT TOUCH", "time has passed since the last trigger", 4320f, description: new ConfigDescription("", null, new ConfigurationManagerAttributes() { Browsable = false }));
 
             SetupWatcherOnConfigFile();
@@ -75,21 +73,21 @@ namespace GroundReset
             Config.SaveOnConfigSet = true;
             Config.Save();
             #endregion
-            onTimer += () => 
-            { 
+            onTimer += () =>
+            {
                 lastReset = DateTime.Now;
+                Debug("onTimer");
             };
 
             harmony.PatchAll();
         }
 
-        private void Update()
-        {
-            if(Input.GetKeyDown(KeyCode.P)) isKeyPrtesed = !isKeyPrtesed;
-        }
-
         #region tools
-        public void Debug(string msg)
+        public static void Debug(string msg)
+        {
+            _self.DebugPrivate(msg);
+        }
+        private void DebugPrivate(string msg)
         {
             Logger.LogInfo(msg);
         }

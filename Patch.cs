@@ -15,7 +15,13 @@ namespace GroundReset
         public static bool TerrainLoad_ResetItsDataIfTimerCompleted(TerrainComp __instance, ref bool __result)
         {
             ZDO zdo = __instance.m_nview.GetZDO();
-            DateTime time = JSON.ToObject<DateTime>(zdo.GetString($"{ModName} time", ""));
+            string json = zdo.GetString($"{ModName} time", "");
+            if(string.IsNullOrEmpty(json))
+            {
+                zdo.Set($"{ModName} time", JSON.ToJSON(DateTime.MinValue));
+                return true;
+            }
+            DateTime time = JSON.ToObject<DateTime>(json);
             if(time == null) return true;
 
             if(time == lastReset)
