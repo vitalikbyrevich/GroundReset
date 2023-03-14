@@ -1,7 +1,7 @@
 ﻿using CodeMonkey.Utils;
-using fastJSON;
 using HarmonyLib;
 using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using static GroundReset.Plugin;
@@ -14,28 +14,37 @@ namespace GroundReset
         [HarmonyPatch(typeof(TerrainComp), nameof(TerrainComp.Load)), HarmonyPrefix]
         public static bool TerrainLoad_ResetItsDataIfTimerCompleted(TerrainComp __instance, ref bool __result)
         {
+            __result = true;
+            Debug("TerrainLoad_ResetItsDataIfTimerCompleted 0");
             ZDO zdo = __instance.m_nview.GetZDO();
+            Debug("TerrainLoad_ResetItsDataIfTimerCompleted 1");
             string json = zdo.GetString($"{ModName} time", "");
+            Debug("TerrainLoad_ResetItsDataIfTimerCompleted 2");
             if(string.IsNullOrEmpty(json))
             {
-                zdo.Set($"{ModName} time", JSON.ToJSON(DateTime.MinValue));
+            Debug("TerrainLoad_ResetItsDataIfTimerCompleted 3");
+                zdo.Set($"{ModName} time", DateTime.MinValue.ToString());
                 return true;
             }
-            DateTime time = JSON.ToObject<DateTime>(json);
-            if(time == null) return true;
+            if(json == lastReset.ToString()) return true;
 
-            if(time == lastReset)
-            {
-                return true;
-            }
+            Debug("TerrainLoad_ResetItsDataIfTimerCompleted 4");
+            DateTime time = Convert.ToDateTime(json); if(time == null) return true;
+            Debug($"Saved time is {json}, lastResetTime is {lastReset}");
 
-            PrivateArea ward = IsPointInsideWard(__instance.transform.position);
-            bool haveWard = ward != null;
-            if(haveWard) return true;
+
+
+            Debug("TerrainLoad_ResetItsDataIfTimerCompleted 5");
+            bool ward = IsPointInsideWard(__instance.transform.position);
+            if(ward) return true;
+            Debug($"Reset Terrain");
 
             __result = true;
-            __instance.Save();
-            zdo.Set($"{ModName} time", JSON.ToJSON(lastReset));
+            Debug("TerrainLoad_ResetItsDataIfTimerCompleted 6");
+            zdo.Set($"{ModName} time", lastReset.ToString());
+            Debug("TerrainLoad_ResetItsDataIfTimerCompleted 7");
+            zdo.m_byteArrays?.Remove("TCData".GetStableHashCode());
+            Debug("TerrainLoad_ResetItsDataIfTimerCompleted 8");
             return false;
         }
 
@@ -54,14 +63,14 @@ namespace GroundReset
             FunctionTimer.Create(onTimer, time * 60, "JF_GroundReset", true, true);
         }
 
-        public static PrivateArea IsPointInsideWard(Vector3 point)
+        public static bool IsPointInsideWard(Vector3 point)
         {
             foreach(PrivateArea allArea in PrivateArea.m_allAreas)
             {
                 if(allArea.m_ownerFaction == Character.Faction.Players && allArea.IsInside(point, 0.0f))
-                    return allArea;
+                    return true;
             }
-            return null;
+            return false;
         }
     }
 }

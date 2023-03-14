@@ -1,27 +1,35 @@
-using System;
-using System.Collections.Generic;
-using UnityEngine;
+/* 
+    ------------------- Code Monkey -------------------
 
-namespace CodeMonkey.Utils
-{
+    Thank you for downloading the Code Monkey Utilities
+    I hope you find them useful in your projects
+    If you have any questions use the contact form
+    Cheers!
+
+               unitycodemonkey.com
+    --------------------------------------------------
+ */
+
+using System;
+using UnityEngine;
+using System.Collections.Generic;
+
+namespace CodeMonkey.Utils {
 
     /*
      * Triggers a Action after a certain time 
      * */
-    public class FunctionTimer
-    {
+    public class FunctionTimer {
 
         /*
          * Class to hook Actions into MonoBehaviour
          * */
-        private class MonoBehaviourHook : MonoBehaviour
-        {
+        private class MonoBehaviourHook : MonoBehaviour {
 
             public Action OnUpdate;
 
-            private void Update()
-            {
-                if(OnUpdate != null) OnUpdate();
+            private void Update() {
+                if (OnUpdate != null) OnUpdate();
             }
 
         }
@@ -30,10 +38,8 @@ namespace CodeMonkey.Utils
         private static List<FunctionTimer> timerList; // Holds a reference to all active timers
         private static GameObject initGameObject; // Global game object used for initializing class, is destroyed on scene change
 
-        private static void InitIfNeeded()
-        {
-            if(initGameObject == null)
-            {
+        private static void InitIfNeeded() {
+            if (initGameObject == null) {
                 initGameObject = new GameObject("FunctionTimer_Global");
                 timerList = new List<FunctionTimer>();
             }
@@ -42,32 +48,27 @@ namespace CodeMonkey.Utils
 
 
 
-        public static FunctionTimer Create(Action completeAction, float timer)
-        {
-            return Create(completeAction, timer, "", false, false);
+        public static FunctionTimer Create(Action action, float timer) {
+            return Create(action, timer, "", false, false);
         }
 
-        public static FunctionTimer Create(Action completeAction, float timer, string functionName)
-        {
-            return Create(completeAction, timer, functionName, false, false);
+        public static FunctionTimer Create(Action action, float timer, string functionName) {
+            return Create(action, timer, functionName, false, false);
         }
 
-        public static FunctionTimer Create(Action completeAction, float timer, string functionName, bool useUnscaledDeltaTime)
-        {
-            return Create(completeAction, timer, functionName, useUnscaledDeltaTime, false);
+        public static FunctionTimer Create(Action action, float timer, string functionName, bool useUnscaledDeltaTime) {
+            return Create(action, timer, functionName, useUnscaledDeltaTime, false);
         }
 
-        public static FunctionTimer Create(Action completeAction, float timer, string functionName, bool useUnscaledDeltaTime, bool stopAllWithSameName)
-        {
+        public static FunctionTimer Create(Action action, float timer, string functionName, bool useUnscaledDeltaTime, bool stopAllWithSameName) {
             InitIfNeeded();
 
-            if(stopAllWithSameName)
-            {
+            if (stopAllWithSameName) {
                 StopAllTimersWithName(functionName);
             }
 
-            GameObject obj = new GameObject("FunctionTimer Object " + functionName, typeof(MonoBehaviourHook));
-            FunctionTimer funcTimer = new FunctionTimer(obj, completeAction, timer, functionName, useUnscaledDeltaTime);
+            GameObject obj = new GameObject("FunctionTimer Object "+functionName, typeof(MonoBehaviourHook));
+            FunctionTimer funcTimer = new FunctionTimer(obj, action, timer, functionName, useUnscaledDeltaTime);
             obj.GetComponent<MonoBehaviourHook>().OnUpdate = funcTimer.Update;
 
             timerList.Add(funcTimer);
@@ -75,32 +76,25 @@ namespace CodeMonkey.Utils
             return funcTimer;
         }
 
-        public static void RemoveTimer(FunctionTimer funcTimer)
-        {
+        public static void RemoveTimer(FunctionTimer funcTimer) {
             InitIfNeeded();
             timerList.Remove(funcTimer);
         }
 
-        public static void StopAllTimersWithName(string functionName)
-        {
+        public static void StopAllTimersWithName(string functionName) {
             InitIfNeeded();
-            for(int i = 0; i < timerList.Count; i++)
-            {
-                if(timerList[i].functionName == functionName)
-                {
+            for (int i = 0; i < timerList.Count; i++) {
+                if (timerList[i].functionName == functionName) {
                     timerList[i].DestroySelf();
                     i--;
                 }
             }
         }
 
-        public static void StopFirstTimerWithName(string functionName)
-        {
+        public static void StopFirstTimerWithName(string functionName) {
             InitIfNeeded();
-            for(int i = 0; i < timerList.Count; i++)
-            {
-                if(timerList[i].functionName == functionName)
-                {
+            for (int i = 0; i < timerList.Count; i++) {
+                if (timerList[i].functionName == functionName) {
                     timerList[i].DestroySelf();
                     return;
                 }
@@ -116,42 +110,34 @@ namespace CodeMonkey.Utils
         private string functionName;
         private bool active;
         private bool useUnscaledDeltaTime;
-        private Action completeAction;
+        private Action action;
 
 
 
-        public FunctionTimer(GameObject gameObject, Action completeAction, float timer, string functionName, bool useUnscaledDeltaTime)
-        {
+        public FunctionTimer(GameObject gameObject, Action action, float timer, string functionName, bool useUnscaledDeltaTime) {
             this.gameObject = gameObject;
-            this.completeAction = completeAction;
+            this.action = action;
             this.timer = timer;
             this.functionName = functionName;
             this.useUnscaledDeltaTime = useUnscaledDeltaTime;
         }
 
-        private void Update()
-        {
-            if(useUnscaledDeltaTime)
-            {
+        private void Update() {
+            if (useUnscaledDeltaTime) {
                 timer -= Time.unscaledDeltaTime;
-            }
-            else
-            {
+            } else {
                 timer -= Time.deltaTime;
             }
-            if(timer <= 0)
-            {
+            if (timer <= 0) {
                 // Timer complete, trigger Action
-                completeAction();
+                action();
                 DestroySelf();
             }
         }
 
-        private void DestroySelf()
-        {
+        private void DestroySelf() {
             RemoveTimer(this);
-            if(gameObject != null)
-            {
+            if (gameObject != null) {
                 UnityEngine.Object.Destroy(gameObject);
             }
         }
@@ -162,42 +148,36 @@ namespace CodeMonkey.Utils
         /*
          * Class to trigger Actions manually without creating a GameObject
          * */
-        public class FunctionTimerObject
-        {
+        public class FunctionTimerObject {
 
             private float timer;
             private Action callback;
 
-            public FunctionTimerObject(Action callback, float timer)
-            {
+            public FunctionTimerObject(Action callback, float timer) {
                 this.callback = callback;
                 this.timer = timer;
             }
 
-            public bool Update()
-            {
+            public bool Update() {
                 return Update(Time.deltaTime);
             }
 
-            public bool Update(float deltaTime)
-            {
+            public bool Update(float deltaTime) {
                 timer -= deltaTime;
-                if(timer <= 0)
-                {
+                if (timer <= 0) {
                     callback();
                     return true;
-                }
-                else
-                {
+                } else {
                     return false;
                 }
             }
         }
 
         // Create a Object that must be manually updated through Update();
-        public static FunctionTimerObject CreateObject(Action callback, float timer)
-        {
+        public static FunctionTimerObject CreateObject(Action callback, float timer) {
             return new FunctionTimerObject(callback, timer);
         }
+
     }
+
 }
