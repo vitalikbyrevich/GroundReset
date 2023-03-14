@@ -50,10 +50,8 @@ namespace GroundReset
         #region values
         internal static ConfigEntry<float> timeInMinutesConfig;
         internal static ConfigEntry<float> timePassedConfig;
-        internal static ConfigEntry<bool> debugConfig;
-        internal static float timeInMinutes;
+        internal static float timeInMinutes = 1;
         internal static float timePassed;
-        internal static bool debug;
         #endregion
         internal static Action onTimer;
 
@@ -70,7 +68,6 @@ namespace GroundReset
 
             timeInMinutesConfig = config("General", "TheTriggerTime", 4320f, new ConfigDescription("", new AcceptableValueRange<float>(0.1f, 312480)));
             timePassedConfig = config("DO NOT TOUCH", "time has passed since the last trigger", 0f, description: new ConfigDescription("", null, new ConfigurationManagerAttributes() { Browsable = false }));
-            debugConfig = config("Debug", "Debug", false, "");
 
             SetupWatcherOnConfigFile();
             Config.ConfigReloaded += (_, _) => { UpdateConfiguration(); };
@@ -89,7 +86,7 @@ namespace GroundReset
 
         private void Update()
         {
-            if(debug && Input.GetKeyDown(KeyCode.P))
+            if(Input.GetKeyDown(KeyCode.P))
             {
                 FunctionTimer.StopAllTimersWithName("JF_GroundReset");
                 onTimer?.Invoke();
@@ -99,7 +96,7 @@ namespace GroundReset
         #region tools
         public static void Debug(string msg, bool debugInAnyWay = false)
         {
-            if(debug || debugInAnyWay) _self.DebugPrivate(msg);
+            if(debugInAnyWay) _self.DebugPrivate(msg);
         }
         private void DebugPrivate(string msg)
         {
@@ -147,8 +144,6 @@ namespace GroundReset
                 }
                 timeInMinutes = timeInMinutesConfig.Value;
 
-                timePassed = timePassedConfig.Value;
-                debug = debugConfig.Value;
             });
 
             Task.WaitAll();
