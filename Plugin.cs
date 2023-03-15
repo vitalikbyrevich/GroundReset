@@ -20,7 +20,7 @@ namespace GroundReset
         public static Plugin _self;
         #endregion
         #region ConfigSettings
-        static string ConfigFileName = "com.Frogger.BossDespawn.cfg";
+        static string ConfigFileName = "com.Frogger.GroundReset.cfg";
         DateTime LastConfigChange;
         public static readonly ConfigSync configSync = new(ModName) { DisplayName = ModName, CurrentVersion = ModVersion, MinimumRequiredVersion = ModVersion };
         public static ConfigEntry<T> config<T>(string group, string name, T value, ConfigDescription description, bool synchronizedSetting = true)
@@ -67,11 +67,12 @@ namespace GroundReset
             #region config
             Config.SaveOnConfigSet = false;
 
-            timeInMinutesConfig = config("General", "TheTriggerTime", 4320f, new ConfigDescription("", new AcceptableValueRange<float>(0.1f, 312480)));
+            timeInMinutesConfig = config("General", "TheTriggerTime", 4320f, "");
             timePassedInMinutesConfig = config("DO NOT TOUCH", "time has passed since the last trigger", 0f, description: new ConfigDescription("", null, new ConfigurationManagerAttributes() { Browsable = false }));
 
             SetupWatcherOnConfigFile();
             Config.ConfigReloaded += (_, _) => { UpdateConfiguration(); };
+            Config.SettingChanged += (_, _) => { UpdateConfiguration(); };
             Config.SaveOnConfigSet = true;
             Config.Save();
             #endregion
@@ -136,7 +137,6 @@ namespace GroundReset
         }
         private void UpdateConfiguration()
         {
-            Debug($"UpdateConfiguration {DateTime.Now}");
             Task task = null;
             task = Task.Run(() =>
             {
@@ -146,6 +146,7 @@ namespace GroundReset
                     FunctionTimer.Create(onTimer, timeInMinutes * 60, "JF_GroundReset", true, true);
                 }
                 timeInMinutes = timeInMinutesConfig.Value;
+                timePassedInMinutes = timePassedInMinutesConfig.Value;
 
             });
 
