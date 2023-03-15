@@ -7,6 +7,7 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 #pragma warning disable CS8632
 namespace GroundReset
@@ -50,7 +51,7 @@ namespace GroundReset
         #region values
         internal static ConfigEntry<float> timeInMinutesConfig;
         internal static ConfigEntry<float> timePassedInMinutesConfig;
-        internal static float timeInMinutes = 1;
+        internal static float timeInMinutes = -1;
         internal static float timePassedInMinutes;
         #endregion
         internal static Action onTimer;
@@ -80,19 +81,11 @@ namespace GroundReset
             {
                 lastReset = DateTime.Now;
                 FunctionTimer.Create(onTimer, timeInMinutes * 60, "JF_GroundReset", true, true);
+                timePassedInMinutes = 0;
                 Debug($"onTimer {DateTime.Now}");
             };
 
             harmony.PatchAll();
-        }
-
-        private void Update()
-        {
-            if(Input.GetKeyDown(KeyCode.P))
-            {
-                FunctionTimer.StopAllTimersWithName("JF_GroundReset");
-                onTimer?.Invoke();
-            }
         }
 
         #region tools
@@ -140,14 +133,13 @@ namespace GroundReset
             Task task = null;
             task = Task.Run(() =>
             {
-                if(timeInMinutes != timeInMinutesConfig.Value)
+                if(timeInMinutes != -1 && timeInMinutes != timeInMinutesConfig.Value && SceneManager.GetActiveScene().name == "main")
                 {
                     FunctionTimer.StopAllTimersWithName("JF_GroundReset");
                     FunctionTimer.Create(onTimer, timeInMinutes * 60, "JF_GroundReset", true, true);
                 }
                 timeInMinutes = timeInMinutesConfig.Value;
                 timePassedInMinutes = timePassedInMinutesConfig.Value;
-
             });
 
             Task.WaitAll();

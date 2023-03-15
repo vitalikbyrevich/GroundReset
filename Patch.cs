@@ -52,7 +52,7 @@ namespace GroundReset
             time *= 60;
 
 
-            FunctionTimer.Create(onTimer, time * 60, "JF_GroundReset", true, true);
+            FunctionTimer.Create(onTimer, time, "JF_GroundReset", true, true);
         }
 
         public static bool IsPointInsideWard(Vector3 point)
@@ -66,7 +66,7 @@ namespace GroundReset
         }
 
 
-        [HarmonyPatch(typeof(ZNet), nameof(ZNet.Save)), HarmonyPostfix]
+        [HarmonyPatch(typeof(ZNet), nameof(ZNet.OnDestroy)), HarmonyPostfix]
         public static void ZNet_OnShutdown()
         {
             timePassedInMinutesConfig.Value = timer.Timer / 60;
