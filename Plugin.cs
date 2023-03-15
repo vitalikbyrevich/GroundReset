@@ -49,13 +49,14 @@ namespace GroundReset
         #endregion
         #region values
         internal static ConfigEntry<float> timeInMinutesConfig;
-        internal static ConfigEntry<float> timePassedConfig;
+        internal static ConfigEntry<float> timePassedInMinutesConfig;
         internal static float timeInMinutes = 1;
-        internal static float timePassed;
+        internal static float timePassedInMinutes;
         #endregion
         internal static Action onTimer;
 
         internal static DateTime lastReset;
+        internal static FunctionTimer timer;
 
 
 
@@ -67,7 +68,7 @@ namespace GroundReset
             Config.SaveOnConfigSet = false;
 
             timeInMinutesConfig = config("General", "TheTriggerTime", 4320f, new ConfigDescription("", new AcceptableValueRange<float>(0.1f, 312480)));
-            timePassedConfig = config("DO NOT TOUCH", "time has passed since the last trigger", 0f, description: new ConfigDescription("", null, new ConfigurationManagerAttributes() { Browsable = false }));
+            timePassedInMinutesConfig = config("DO NOT TOUCH", "time has passed since the last trigger", 0f, description: new ConfigDescription("", null, new ConfigurationManagerAttributes() { Browsable = false }));
 
             SetupWatcherOnConfigFile();
             Config.ConfigReloaded += (_, _) => { UpdateConfiguration(); };
@@ -78,7 +79,7 @@ namespace GroundReset
             {
                 lastReset = DateTime.Now;
                 FunctionTimer.Create(onTimer, timeInMinutes * 60, "JF_GroundReset", true, true);
-                Debug("onTimer");
+                Debug($"onTimer {DateTime.Now}");
             };
 
             harmony.PatchAll();
@@ -94,9 +95,9 @@ namespace GroundReset
         }
 
         #region tools
-        public static void Debug(string msg, bool debugInAnyWay = false)
+        public static void Debug(string msg)
         {
-            if(debugInAnyWay) _self.DebugPrivate(msg);
+            _self.DebugPrivate(msg);
         }
         private void DebugPrivate(string msg)
         {
@@ -135,11 +136,13 @@ namespace GroundReset
         }
         private void UpdateConfiguration()
         {
+            Debug($"UpdateConfiguration {DateTime.Now}");
             Task task = null;
             task = Task.Run(() =>
             {
                 if(timeInMinutes != timeInMinutesConfig.Value)
                 {
+                    FunctionTimer.StopAllTimersWithName("JF_GroundReset");
                     FunctionTimer.Create(onTimer, timeInMinutes * 60, "JF_GroundReset", true, true);
                 }
                 timeInMinutes = timeInMinutesConfig.Value;

@@ -15,46 +15,38 @@ namespace GroundReset
         public static bool TerrainLoad_ResetItsDataIfTimerCompleted(TerrainComp __instance, ref bool __result)
         {
             __result = true;
-            Debug("TerrainLoad_ResetItsDataIfTimerCompleted 0");
+
             ZDO zdo = __instance.m_nview.GetZDO();
-            Debug("TerrainLoad_ResetItsDataIfTimerCompleted 1");
             string json = zdo.GetString($"{ModName} time", "");
-            Debug("TerrainLoad_ResetItsDataIfTimerCompleted 2");
             if(string.IsNullOrEmpty(json))
             {
-            Debug("TerrainLoad_ResetItsDataIfTimerCompleted 3");
                 zdo.Set($"{ModName} time", DateTime.MinValue.ToString());
                 return true;
             }
             if(json == lastReset.ToString()) return true;
 
-            Debug("TerrainLoad_ResetItsDataIfTimerCompleted 4");
             DateTime time = Convert.ToDateTime(json); if(time == null) return true;
             Debug($"Saved time is {json}, lastResetTime is {lastReset}");
 
 
 
-            Debug("TerrainLoad_ResetItsDataIfTimerCompleted 5");
             bool ward = IsPointInsideWard(__instance.transform.position);
             if(ward) return true;
             Debug($"Reset Terrain");
 
             __result = true;
-            Debug("TerrainLoad_ResetItsDataIfTimerCompleted 6");
             zdo.Set($"{ModName} time", lastReset.ToString());
-            Debug("TerrainLoad_ResetItsDataIfTimerCompleted 7");
             zdo.m_byteArrays?.Remove("TCData".GetStableHashCode());
-            Debug("TerrainLoad_ResetItsDataIfTimerCompleted 8");
             return false;
         }
 
-        [HarmonyPatch(typeof(ZNetScene), nameof(ZNetScene.Awake)), HarmonyPrefix]
+        [HarmonyPatch(typeof(ZNetScene), nameof(ZNetScene.Awake)), HarmonyPostfix]
         public static void ZNetSceneAwake_StartTimer(ZNetScene __instance)
         {
             if(SceneManager.GetActiveScene().name != "main") return;
 
-            float time = -1;
-            if(timePassed > 0) time = timeInMinutes - timePassed;
+            float time;
+            if(timePassedInMinutes > 0) time = timePassedInMinutes;
             else time = timeInMinutes;
 
             time *= 60;
@@ -72,5 +64,13 @@ namespace GroundReset
             }
             return false;
         }
+
+
+        [HarmonyPatch(typeof(ZNet), nameof(ZNet.Save)), HarmonyPostfix]
+        public static void ZNet_OnShutdown()
+        {
+            timePassedInMinutesConfig.Value = timer.Timer / 60;
+        }
+
     }
 }
