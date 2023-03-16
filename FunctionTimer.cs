@@ -72,6 +72,7 @@ namespace CodeMonkey.Utils
 
         public static FunctionTimer Create(Action action, float timer, string functionName, bool useUnscaledDeltaTime, bool stopAllWithSameName)
         {
+            if(!ZNet.m_isServer) return null;
             InitIfNeeded();
 
             if(stopAllWithSameName)

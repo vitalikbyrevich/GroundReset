@@ -30,7 +30,7 @@ namespace GroundReset
 
 
 
-            bool ward = IsPointInsideWard(__instance.transform.position);
+            bool ward = IsPointInsideWard(__instance);
             if(ward) return true;
             Debug($"Reset Terrain");
 
@@ -55,12 +55,15 @@ namespace GroundReset
             FunctionTimer.Create(onTimer, time, "JF_GroundReset", true, true);
         }
 
-        public static bool IsPointInsideWard(Vector3 point)
+        public static bool IsPointInsideWard(TerrainComp terrain)
         {
             foreach(PrivateArea allArea in PrivateArea.m_allAreas)
             {
-                if(allArea.m_ownerFaction == Character.Faction.Players && allArea.IsInside(point, 0.0f))
+                if(allArea.m_ownerFaction == Character.Faction.Players && terrain.m_hmap.m_renderMesh..Contains(allArea.transform.position + allArea.m_radius))
+                {
+                    bool flag = , 0.0f);
                     return true;
+                }
             }
             return false;
         }
@@ -69,6 +72,8 @@ namespace GroundReset
         [HarmonyPatch(typeof(ZNet), nameof(ZNet.OnDestroy)), HarmonyPostfix]
         public static void ZNet_OnShutdown()
         {
+            if(!ZNet.m_isServer) return;
+
             timePassedInMinutesConfig.Value = timer.Timer / 60;
         }
 
