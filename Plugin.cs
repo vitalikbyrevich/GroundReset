@@ -5,8 +5,8 @@ using HarmonyLib;
 using ServerSync;
 using System;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
-using UnityEngine;
 using UnityEngine.SceneManagement;
 
 #pragma warning disable CS8632
@@ -16,7 +16,7 @@ namespace GroundReset
     public class Plugin : BaseUnityPlugin
     {
         #region values
-        internal const string ModName = "GroundReset", ModVersion = "1.0.1", ModGUID = "com.Frogger." + ModName;
+        internal const string ModName = "GroundReset", ModVersion = "1.0.3", ModGUID = "com.Frogger." + ModName;
         private static readonly Harmony harmony = new(ModGUID);
         public static Plugin _self;
         #endregion
@@ -79,13 +79,60 @@ namespace GroundReset
             #endregion
             onTimer += () =>
             {
-                lastReset = DateTime.Now;
-                FunctionTimer.Create(onTimer, timeInMinutes * 60, "JF_GroundReset", true, true);
-                timePassedInMinutes = 0;
-                Debug($"onTimer {DateTime.Now}");
+                ZRoutedRpc.instance.InvokeRoutedRPC(ZRoutedRpc.Everybody, nameof(ResetTerrain));
             };
 
             harmony.PatchAll();
+        }
+
+        public void RPC_ResetTerrain(long @long)
+        {
+            lastReset = DateTime.Now;
+            FunctionTimer.Create(onTimer, timeInMinutes * 60, "JF_GroundReset", true, true);
+            timePassedInMinutes = 0;
+            Config.Reload();
+            Debug($"on GroundReset Timer {DateTime.Now}");
+        }
+
+
+        public static bool ResetTerrain(TerrainComp __instance, out bool __result)
+        {
+            __result = false;
+            ZDO zdo = __instance.m_nview.GetZDO();
+            string json = zdo.GetString($"{ModName} time", "");
+            if(string.IsNullOrEmpty(json))
+            {
+                zdo.Set($"{ModName} time", DateTime.MinValue.ToString());
+                return true;
+            }
+            if(json == lastReset.ToString()) return true;
+
+            DateTime time = Convert.ToDateTime(json); if(time == null) return true;
+
+
+
+            bool ward = IsPointInsideWard(__instance);
+            if(ward) return true;
+            Debug($"Reset Terrain");
+
+            __result = true;
+            zdo.Set($"{ModName} time", lastReset.ToString());
+            zdo.m_byteArrays?.Remove("TCData".GetStableHashCode());
+
+            return false;
+        }
+
+        public static bool IsPointInsideWard(TerrainComp terrain)
+        {
+            /*foreach(PrivateArea allArea in PrivateArea.m_allAreas)
+            {
+                if(allArea.m_ownerFaction == Character.Faction.Players && terrain.m_hmap.IsPointInside(allArea.transform.position, allArea.m_radius))
+                {
+                    return true;
+                }
+            }*/
+            bool flag = PrivateArea.m_allAreas.Any(x => x.m_ownerFaction == Character.Faction.Players && terrain.m_hmap.IsPointInside(x.transform.position, x.m_radius));
+            return flag;
         }
 
         #region tools

@@ -1,8 +1,6 @@
 ﻿using CodeMonkey.Utils;
 using HarmonyLib;
 using System;
-using System.Collections;
-using UnityEngine;
 using UnityEngine.SceneManagement;
 using static GroundReset.Plugin;
 
@@ -14,30 +12,14 @@ namespace GroundReset
         [HarmonyPatch(typeof(TerrainComp), nameof(TerrainComp.Load)), HarmonyPrefix]
         public static bool TerrainLoad_ResetItsDataIfTimerCompleted(TerrainComp __instance, ref bool __result)
         {
-            __result = true;
+            bool v = ResetTerrain(__instance, out __result);
+            return v;
+        }
 
-            ZDO zdo = __instance.m_nview.GetZDO();
-            string json = zdo.GetString($"{ModName} time", "");
-            if(string.IsNullOrEmpty(json))
-            {
-                zdo.Set($"{ModName} time", DateTime.MinValue.ToString());
-                return true;
-            }
-            if(json == lastReset.ToString()) return true;
-
-            DateTime time = Convert.ToDateTime(json); if(time == null) return true;
-            Debug($"Saved time is {json}, lastResetTime is {lastReset}");
-
-
-
-            bool ward = IsPointInsideWard(__instance);
-            if(ward) return true;
-            Debug($"Reset Terrain");
-
-            __result = true;
-            zdo.Set($"{ModName} time", lastReset.ToString());
-            zdo.m_byteArrays?.Remove("TCData".GetStableHashCode());
-            return false;
+        [HarmonyPatch(typeof(TerrainComp), nameof(TerrainComp.CheckLoad)), HarmonyPrefix]
+        public static void TerrainLoad_ResetCheckLoad(TerrainComp __instance)
+        {
+            ResetTerrain(__instance, out _);
         }
 
         [HarmonyPatch(typeof(ZNetScene), nameof(ZNetScene.Awake)), HarmonyPostfix]
@@ -55,20 +37,6 @@ namespace GroundReset
             FunctionTimer.Create(onTimer, time, "JF_GroundReset", true, true);
         }
 
-        public static bool IsPointInsideWard(TerrainComp terrain)
-        {
-            foreach(PrivateArea allArea in PrivateArea.m_allAreas)
-            {
-                if(allArea.m_ownerFaction == Character.Faction.Players && terrain.m_hmap.m_renderMesh..Contains(allArea.transform.position + allArea.m_radius))
-                {
-                    bool flag = , 0.0f);
-                    return true;
-                }
-            }
-            return false;
-        }
-
-
         [HarmonyPatch(typeof(ZNet), nameof(ZNet.OnDestroy)), HarmonyPostfix]
         public static void ZNet_OnShutdown()
         {
@@ -77,5 +45,10 @@ namespace GroundReset
             timePassedInMinutesConfig.Value = timer.Timer / 60;
         }
 
+        [HarmonyPatch(typeof(ZNetScene), nameof(ZNetScene.Awake)), HarmonyPostfix]
+        public static void ZNetSceneAwake()
+        {
+            ZRoutedRpc.instance.Register("ResetTerrain", new Action<long>(_self.RPC_ResetTerrain));
+        }
     }
 }
