@@ -7,6 +7,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using UnityEngine;
 using UnityEngine.SceneManagement;
 
 #pragma warning disable CS8632
@@ -124,15 +125,8 @@ namespace GroundReset
 
         public static bool IsPointInsideWard(TerrainComp terrain)
         {
-            /*foreach(PrivateArea allArea in PrivateArea.m_allAreas)
-            {
-                if(allArea.m_ownerFaction == Character.Faction.Players && terrain.m_hmap.IsPointInside(allArea.transform.position, allArea.m_radius))
-                {
-                    return true;
-                }
-            }*/
-            bool flag = PrivateArea.m_allAreas.Any(x => x.m_ownerFaction == Character.Faction.Players && terrain.m_hmap.IsPointInside(x.transform.position, x.m_radius));
-            return flag;
+            Vector3 centerOfTerrain = terrain.m_hmap.GetCenter();
+            return PrivateArea.m_allAreas.Any(x => x.m_ownerFaction == Character.Faction.Players && x.IsInside(centerOfTerrain, 45f));
         }
 
         #region tools
