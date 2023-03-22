@@ -9,14 +9,13 @@ namespace GroundReset
 {
     internal static class Reseter
     {
-        internal static int ResetTerrain(Vector3 center, float radius)
+        internal static int ResetTerrain(Vector3 center)
         {
-            if(ChechWard(center, radius)) return 0;
             int resets = 0;
             List<Heightmap> list = new();
 
 
-            Heightmap.FindHeightmap(center, radius + 100, list);
+            Heightmap.FindHeightmap(center, 45, list);
 
 
             List<TerrainModifier> allInstances = TerrainModifier.GetAllInstances();
@@ -52,6 +51,9 @@ namespace GroundReset
                     Traverse traverse = Traverse.Create(terrainComp);
 
                     if(!traverse.Field("m_initialized").GetValue<bool>())
+                        continue;
+                    
+                    if(!ChechWard(terrainComp.m_hmap.GetCenter()))
                         continue;
 
                     enumerator.Current.WorldToVertex(center, out int x, out int y);
@@ -138,9 +140,10 @@ namespace GroundReset
             return resets;
         }
 
-        private static bool ChechWard(Vector3 center, float radius)
+        private static bool ChechWard(Vector3 center)
         {
-            return PrivateArea.m_allAreas.Any(x => x.m_ownerFaction == Character.Faction.Players && x.IsInside(center, radius));
+            float radius = 60;
+            return PrivateArea.m_allAreas.Any(x => x.m_ownerFaction == Character.Faction.Players && Utils.DistanceXZ(center, x.transform.position) <= radius);
         }
 
         private static float CoordDistance(float x, float y, float rx, float ry)
@@ -154,7 +157,7 @@ namespace GroundReset
         {
             yield return new WaitForSeconds(15f);
 
-            int v = ResetTerrain(center, radius);
+            int v = ResetTerrain(center);
             Debug($"{v} Terrains Reseted");
         }
     }

@@ -1,6 +1,8 @@
 ﻿using CodeMonkey.Utils;
 using HarmonyLib;
 using System;
+using System.Linq;
+using UnityEngine;
 using UnityEngine.SceneManagement;
 using static GroundReset.Plugin;
 
@@ -53,6 +55,17 @@ namespace GroundReset
         public static void ZNetSceneAwake()
         {
             ZRoutedRpc.instance.Register("ResetTerrain", new Action<long>(_self.RPC_ResetTerrain));
+        }
+
+        [HarmonyPatch(typeof(TerrainOp), nameof(TerrainOp.OnPlaced)), HarmonyPostfix]
+        public static void TerrainOpOnPlaced(TerrainOp __instance)
+        {
+            FindWardOnPosition(__instance.transform.position);
+        }
+
+        private static void FindWardOnPosition(Vector3 pos)
+        {
+            PrivateArea.m_allAreas.Any(x => x.t);
         }
     }
 }
