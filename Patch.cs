@@ -9,17 +9,21 @@ namespace GroundReset
     [HarmonyPatch]
     internal class Patch
     {
-        [HarmonyPatch(typeof(TerrainComp), nameof(TerrainComp.Load)), HarmonyPrefix]
-        public static bool TerrainLoad_ResetItsDataIfTimerCompleted(TerrainComp __instance, ref bool __result)
+        [HarmonyPatch(typeof(TerrainComp), nameof(TerrainComp.Load)), HarmonyPostfix]
+        public static void TerrainLoad_ResetItsDataIfTimerCompleted(TerrainComp __instance, ref bool __result)
         {
-            bool v = ResetTerrain(__instance, out __result);
-            return v;
-        }
+            ZDO zdo = __instance.m_nview.GetZDO();
+            string json = zdo.GetString($"{ModName} time", "");
+            if(string.IsNullOrEmpty(json))
+            {
+                zdo.Set($"{ModName} time", DateTime.MinValue.ToString());
+                return;
+            }
+            if(json == lastReset.ToString()) return;
 
-        [HarmonyPatch(typeof(TerrainComp), nameof(TerrainComp.CheckLoad)), HarmonyPrefix]
-        public static void TerrainLoad_ResetCheckLoad(TerrainComp __instance)
-        {
-            ResetTerrain(__instance, out _);
+            DateTime time = Convert.ToDateTime(json); if(time == null) return;
+
+            _self.StartCoroutine(Reseter.WateForReset(__instance.m_hmap.GetCenter(), 45));
         }
 
         [HarmonyPatch(typeof(ZNetScene), nameof(ZNetScene.Awake)), HarmonyPostfix]

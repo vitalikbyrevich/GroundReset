@@ -17,7 +17,7 @@ namespace GroundReset
     public class Plugin : BaseUnityPlugin
     {
         #region values
-        internal const string ModName = "GroundReset", ModVersion = "1.0.3", ModGUID = "com.Frogger." + ModName;
+        internal const string ModName = "GroundReset", ModVersion = "1.0.5", ModGUID = "com.Frogger." + ModName;
         private static readonly Harmony harmony = new(ModGUID);
         public static Plugin _self;
         #endregion
@@ -56,10 +56,8 @@ namespace GroundReset
         internal static float timePassedInMinutes;
         #endregion
         internal static Action onTimer;
-
         internal static DateTime lastReset;
         internal static FunctionTimer timer;
-
 
 
         private void Awake()
@@ -80,7 +78,7 @@ namespace GroundReset
             #endregion
             onTimer += () =>
             {
-                ZRoutedRpc.instance.InvokeRoutedRPC(ZRoutedRpc.Everybody, nameof(ResetTerrain));
+                ZRoutedRpc.instance.InvokeRoutedRPC(ZRoutedRpc.Everybody, "ResetTerrain");
             };
 
             harmony.PatchAll();
@@ -93,40 +91,7 @@ namespace GroundReset
             timePassedInMinutes = 0;
             Config.Reload();
             Debug($"on GroundReset Timer {DateTime.Now}");
-        }
-
-
-        public static bool ResetTerrain(TerrainComp __instance, out bool __result)
-        {
-            __result = false;
-            ZDO zdo = __instance.m_nview.GetZDO();
-            string json = zdo.GetString($"{ModName} time", "");
-            if(string.IsNullOrEmpty(json))
-            {
-                zdo.Set($"{ModName} time", DateTime.MinValue.ToString());
-                return true;
-            }
-            if(json == lastReset.ToString()) return true;
-
-            DateTime time = Convert.ToDateTime(json); if(time == null) return true;
-
-
-
-            bool ward = IsPointInsideWard(__instance);
-            if(ward) return true;
-            Debug($"Reset Terrain");
-
-            __result = true;
-            zdo.Set($"{ModName} time", lastReset.ToString());
-            zdo.m_byteArrays?.Remove("TCData".GetStableHashCode());
-
-            return false;
-        }
-
-        public static bool IsPointInsideWard(TerrainComp terrain)
-        {
-            Vector3 centerOfTerrain = terrain.m_hmap.GetCenter();
-            return PrivateArea.m_allAreas.Any(x => x.m_ownerFaction == Character.Faction.Players && x.IsInside(centerOfTerrain, 45f));
+            if(!ZNet.m_isServer) Player.m_localPlayer.Message(MessageHud.MessageType.TopLeft, $"<color=yellow>Подготовка к сбросу территории</color>");
         }
 
         #region tools
