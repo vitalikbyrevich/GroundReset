@@ -91,6 +91,7 @@ namespace GroundReset
             timePassedInMinutes = 0;
             Config.Reload();
             Debug($"on GroundReset Timer {DateTime.Now}");
+            Reseter.RecordDataInWards();
             if(!ZNet.m_isServer) Player.m_localPlayer.Message(MessageHud.MessageType.TopLeft, $"<color=yellow>Подготовка к сбросу территории</color>");
         }
 

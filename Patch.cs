@@ -11,7 +11,7 @@ namespace GroundReset
     [HarmonyPatch]
     internal class Patch
     {
-        [HarmonyPatch(typeof(TerrainComp), nameof(TerrainComp.Load)), HarmonyPostfix]
+        [HarmonyPatch(typeof(TerrainComp), nameof(TerrainComp.Load)), HarmonyPrefix]
         public static void TerrainLoad_ResetItsDataIfTimerCompleted(TerrainComp __instance, ref bool __result)
         {
             ZDO zdo = __instance.m_nview.GetZDO();
@@ -65,30 +65,35 @@ namespace GroundReset
         [HarmonyPatch(typeof(PrivateArea), nameof(PrivateArea.Awake)), HarmonyPostfix]
         public static void PrivateAreaAwake(PrivateArea __instance)
         {
+            LoadAreaOfWard(__instance);
+        }
+
+        private static void LoadAreaOfWard(PrivateArea ward)
+        {
             TerrainOp.Settings modifier = new()
             {
                 m_smooth = true,
                 m_smoothPower = 999,
                 m_smoothRadius = 3
             };
-            if (__instance.m_nview.GetZDO().GetBool("NeedToReturn", false))
+            if (ward.m_nview.GetZDO().GetBool("NeedToReturn", false))
             {
-                __instance.m_areaMarker.CreateSegments();
-                foreach (var segment in __instance.m_areaMarker.m_segments)
+                ward.m_areaMarker.CreateSegments();
+                foreach (var segment in ward.m_areaMarker.m_segments)
                 {
                     var terrainComp = TerrainComp.FindTerrainCompiler(segment.transform.position);
                     if (!terrainComp) continue;
-                    byte[] byteArray = __instance.m_nview.GetZDO().GetByteArray($"TCData_{terrainComp.transform.position}");
-                    if(byteArray == null) continue;
+                    byte[] byteArray = ward.m_nview.GetZDO().GetByteArray($"TCData_{terrainComp.transform.position}");
+                    if (byteArray == null) continue;
                     terrainComp.m_nview.GetZDO().Set($"TCData", byteArray);
                     terrainComp.DoOperation(segment.transform.position, modifier);
                     terrainComp.m_nview.GetZDO().m_dataRevision--;
                 }
 
-                __instance.m_nview.GetZDO().Set("NeedToReturn", false);
+                ward.m_nview.GetZDO().Set("NeedToReturn", false);
             }
 
-            Chat.instance.SetNpcText(__instance.gameObject, Vector3.up * 1.5f, 20f, 2.5f, "", "I given ur terrain back",
+            Chat.instance.SetNpcText(ward.gameObject, Vector3.up * 1.5f, 20f, 2.5f, "", "I given ur terrain back",
                 false);
         }
 
