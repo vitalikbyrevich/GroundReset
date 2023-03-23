@@ -68,7 +68,9 @@ namespace GroundReset
         {
             if(__instance.m_nview.GetZDO().GetBool("NeedToReturn", false))
             {
-                __instance
+                __instance.m_nview.GetZDO().Set("TCData", __instance.m_nview.GetZDO().GetByteArray("TCData_Dub"));
+                __instance.m_nview.GetZDO().m_dataRevision--;
+                __instance.m_nview.GetZDO().Set("NeedToReturn", false);
             }
         }
 
