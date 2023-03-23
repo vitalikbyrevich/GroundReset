@@ -16,12 +16,13 @@ namespace GroundReset
         {
             ZDO zdo = __instance.m_nview.GetZDO();
             string json = zdo.GetString($"{ModName} time", "");
-            if(string.IsNullOrEmpty(json))
+            if (string.IsNullOrEmpty(json))
             {
                 zdo.Set($"{ModName} time", DateTime.MinValue.ToString());
                 return;
             }
-            if(json == lastReset.ToString()) return;
+
+            if (json == lastReset.ToString()) return;
 
             _self.StartCoroutine(Reseter.WateForReset(__instance.m_hmap));
         }
@@ -29,10 +30,10 @@ namespace GroundReset
         [HarmonyPatch(typeof(ZNetScene), nameof(ZNetScene.Awake)), HarmonyPostfix]
         public static void ZNetSceneAwake_StartTimer(ZNetScene __instance)
         {
-            if(SceneManager.GetActiveScene().name != "main") return;
+            if (SceneManager.GetActiveScene().name != "main") return;
 
             float time;
-            if(timePassedInMinutes > 0) time = timePassedInMinutes;
+            if (timePassedInMinutes > 0) time = timePassedInMinutes;
             else time = timeInMinutes;
 
             time *= 60;
@@ -41,11 +42,10 @@ namespace GroundReset
             FunctionTimer.Create(onTimer, time, "JF_GroundReset", true, true);
         }
 
-        
         [HarmonyPatch(typeof(ZNet), nameof(ZNet.OnDestroy)), HarmonyPostfix]
         public static void ZNet_OnShutdown()
         {
-            if(!ZNet.m_isServer) return;
+            if (!ZNet.m_isServer) return;
 
             timePassedInMinutesConfig.Value = timer.Timer / 60;
         }
@@ -71,21 +71,25 @@ namespace GroundReset
                 m_smoothPower = 999,
                 m_smoothRadius = 3
             };
-            if(__instance.m_nview.GetZDO().GetBool("NeedToReturn", false))
+            if (__instance.m_nview.GetZDO().GetBool("NeedToReturn", false))
             {
-                var terrainComp = TerrainComp.FindTerrainCompiler(__instance.transform.position);
-                if(!terrainComp) return;
-                terrainComp.m_nview.GetZDO().Set("TCData", __instance.m_nview.GetZDO().GetByteArray("TCData_Dub"));
-                terrainComp.m_nview.GetZDO().m_dataRevision--;
-                __instance.m_nview.GetZDO().Set("NeedToReturn", false);
-
-                foreach(var segment in __instance.m_areaMarker.m_segments)
+                __instance.m_areaMarker.CreateSegments();
+                foreach (var segment in __instance.m_areaMarker.m_segments)
                 {
+                    var terrainComp = TerrainComp.FindTerrainCompiler(segment.transform.position);
+                    if (!terrainComp) continue;
+                    byte[] byteArray = __instance.m_nview.GetZDO().GetByteArray($"TCData_{terrainComp.transform.position}");
+                    if(byteArray == null) continue;
+                    terrainComp.m_nview.GetZDO().Set($"TCData", byteArray);
                     terrainComp.DoOperation(segment.transform.position, modifier);
+                    terrainComp.m_nview.GetZDO().m_dataRevision--;
                 }
+
+                __instance.m_nview.GetZDO().Set("NeedToReturn", false);
             }
 
-            Chat.instance.SetNpcText(__instance.gameObject, Vector3.up * 1.5f, 20f, 2.5f, "", "I given ur terrain back", false);
+            Chat.instance.SetNpcText(__instance.gameObject, Vector3.up * 1.5f, 20f, 2.5f, "", "I given ur terrain back",
+                false);
         }
 
         //private static void FindWardOnPosition(Vector3 pos)
