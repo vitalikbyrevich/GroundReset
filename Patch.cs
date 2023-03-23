@@ -23,9 +23,7 @@ namespace GroundReset
             }
             if(json == lastReset.ToString()) return;
 
-            DateTime time = Convert.ToDateTime(json); if(time == null) return;
-
-            _self.StartCoroutine(Reseter.WateForReset(__instance.m_hmap.GetCenter(), 45));
+            _self.StartCoroutine(Reseter.WateForReset(__instance.m_hmap));
         }
 
         [HarmonyPatch(typeof(ZNetScene), nameof(ZNetScene.Awake)), HarmonyPostfix]
@@ -64,19 +62,34 @@ namespace GroundReset
         }*/
 
         [HarmonyPatch(typeof(PrivateArea), nameof(PrivateArea.Awake)), HarmonyPostfix]
-        public static void TerrainOpOnPlaced(PrivateArea __instance)
+        public static void PrivateAreaAwake(PrivateArea __instance)
         {
+            TerrainOp.Settings modifier = new()
+            {
+                m_smooth = true,
+                m_smoothPower = 999,
+                m_smoothRadius = 3
+            };
             if(__instance.m_nview.GetZDO().GetBool("NeedToReturn", false))
             {
-                __instance.m_nview.GetZDO().Set("TCData", __instance.m_nview.GetZDO().GetByteArray("TCData_Dub"));
-                __instance.m_nview.GetZDO().m_dataRevision--;
+                var terrainComp = TerrainComp.FindTerrainCompiler(__instance.transform.position);
+                if(!terrainComp) return;
+                terrainComp.m_nview.GetZDO().Set("TCData", __instance.m_nview.GetZDO().GetByteArray("TCData_Dub"));
+                terrainComp.m_nview.GetZDO().m_dataRevision--;
                 __instance.m_nview.GetZDO().Set("NeedToReturn", false);
+
+                foreach(var segment in __instance.m_areaMarker.m_segments)
+                {
+                    terrainComp.DoOperation(segment.transform.position, modifier);
+                }
             }
+
+            Chat.instance.SetNpcText(__instance.gameObject, Vector3.up * 1.5f, 20f, 2.5f, "", "I given ur terrain back", false);
         }
 
-        private static void FindWardOnPosition(Vector3 pos)
-        {
-            PrivateArea.m_allAreas.Any(x => x.transform.position == pos);
-        }
+        //private static void FindWardOnPosition(Vector3 pos)
+        //{
+        //    PrivateArea.m_allAreas.Any(x => x.transform.position == pos);
+        //}
     }
 }
