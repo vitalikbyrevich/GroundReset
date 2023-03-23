@@ -169,7 +169,7 @@ namespace GroundReset
 
         public static IEnumerator WateForReset(Heightmap heightmap)
         {
-            yield return new WaitForSeconds(0);
+            yield return new WaitForSeconds(15f);
 
             ResetTerrain(heightmap);
             Debug($"Terrain Reseted");
