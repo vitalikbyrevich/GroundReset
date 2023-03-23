@@ -1,7 +1,6 @@
 ﻿using HarmonyLib;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using static GroundReset.Plugin;
 
@@ -11,11 +10,13 @@ namespace GroundReset
     {
         internal static int ResetTerrain(Vector3 center)
         {
+            RecordDataInWards();
             int resets = 0;
+            float radius = 45;
             List<Heightmap> list = new();
 
 
-            Heightmap.FindHeightmap(center, 45, list);
+            Heightmap.FindHeightmap(center, radius, list);
 
 
             List<TerrainModifier> allInstances = TerrainModifier.GetAllInstances();
@@ -51,9 +52,6 @@ namespace GroundReset
                     Traverse traverse = Traverse.Create(terrainComp);
 
                     if(!traverse.Field("m_initialized").GetValue<bool>())
-                        continue;
-                    
-                    if(!ChechWard(terrainComp.m_hmap.GetCenter()))
                         continue;
 
                     enumerator.Current.WorldToVertex(center, out int x, out int y);
@@ -140,11 +138,11 @@ namespace GroundReset
             return resets;
         }
 
-        private static bool ChechWard(Vector3 center)
-        {
-            float radius = 60;
-            return PrivateArea.m_allAreas.Any(x => x.m_ownerFaction == Character.Faction.Players && Utils.DistanceXZ(center, x.transform.position) <= radius);
-        }
+        //private static bool ChechWard(Vector3 center)
+        //{
+        //    float radius = 60;
+        //    return PrivateArea.m_allAreas.Any(x => x.m_ownerFaction == Character.Faction.Players && Utils.DistanceXZ(center, x.transform.position) <= radius);
+        //}
 
         private static float CoordDistance(float x, float y, float rx, float ry)
         {
@@ -159,6 +157,29 @@ namespace GroundReset
 
             int v = ResetTerrain(center);
             Debug($"{v} Terrains Reseted");
+        }
+
+        public static void RecordDataInWards()
+        {
+            foreach(PrivateArea ward in PrivateArea.m_allAreas)
+            {
+                List<Heightmap> heightmaps = new();
+                Heightmap.FindHeightmap(ward.transform.position, ward.m_radius + 45, heightmaps);
+                //TerrainComp terrainComp = TerrainComp.FindTerrainCompiler(ward.transform.position);
+                foreach(Heightmap heightmap in heightmaps)
+                {
+                    TerrainComp terrainComp = TerrainComp.FindTerrainCompiler(heightmap.transform.position);
+                    if(!terrainComp) continue;
+
+                    byte[] byteArray = terrainComp.m_nview.GetZDO().GetByteArray("TCData");
+                    terrainComp.m_nview.GetZDO().Set("TCData_Dub", byteArray);
+                    terrainComp.m_nview.GetZDO().Set("NeedToReturn", true);
+
+                }
+
+
+                ward.m_nview.GetZDO().Set("", "");
+            }
         }
     }
 }

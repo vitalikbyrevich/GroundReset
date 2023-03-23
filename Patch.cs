@@ -57,15 +57,24 @@ namespace GroundReset
             ZRoutedRpc.instance.Register("ResetTerrain", new Action<long>(_self.RPC_ResetTerrain));
         }
 
-        [HarmonyPatch(typeof(TerrainOp), nameof(TerrainOp.OnPlaced)), HarmonyPostfix]
+        /*[HarmonyPatch(typeof(TerrainOp), nameof(TerrainOp.OnPlaced)), HarmonyPostfix]
         public static void TerrainOpOnPlaced(TerrainOp __instance)
         {
             FindWardOnPosition(__instance.transform.position);
+        }*/
+
+        [HarmonyPatch(typeof(PrivateArea), nameof(PrivateArea.Awake)), HarmonyPostfix]
+        public static void TerrainOpOnPlaced(PrivateArea __instance)
+        {
+            if(__instance.m_nview.GetZDO().GetBool("NeedToReturn", false))
+            {
+                __instance
+            }
         }
 
         private static void FindWardOnPosition(Vector3 pos)
         {
-            PrivateArea.m_allAreas.Any(x => x.t);
+            PrivateArea.m_allAreas.Any(x => x.transform.position == pos);
         }
     }
 }
