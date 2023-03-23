@@ -41,6 +41,7 @@ namespace GroundReset
             FunctionTimer.Create(onTimer, time, "JF_GroundReset", true, true);
         }
 
+        
         [HarmonyPatch(typeof(ZNet), nameof(ZNet.OnDestroy)), HarmonyPostfix]
         public static void ZNet_OnShutdown()
         {
