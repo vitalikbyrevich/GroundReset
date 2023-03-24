@@ -119,4 +119,14 @@
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\ILRepack.Lib.MSBuild.Task.2.0.18.2\build\ILRepack.Lib.MSBuild.Task.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\ILRepack.Lib.MSBuild.Task.2.0.18.2\build\ILRepack.Lib.MSBuild.Task.targets'))" />
   </Target>
+  <PropertyGroup>
+    <PostBuildEvent>
+      if $(ConfigurationName) == Release (
+      powershell Compress-Archive -Path '$(ProjectDir)Package\*' -DestinationPath '$(SolutionDir)PublishOutput\$(ProjectName).zip' -Force)
+      if $(ConfigurationName) == Debug del "$(TargetPath).mdb"
+      if $(ConfigurationName) == Debug $(SolutionDir)pdb2mdb.exe "$(TargetPath)"
+      xcopy "$(TargetDir)" "$(GameDir)\Bepinex\plugins\$(ProjectName)\" /q /s /y /i
+      xcopy "$(ProjectDir)README.md" "$(ProjectDir)Package\" /q /y /i
+    </PostBuildEvent>
+  </PropertyGroup>
 </Project>

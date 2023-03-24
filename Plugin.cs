@@ -91,7 +91,6 @@ namespace GroundReset
             timePassedInMinutes = 0;
             Config.Reload();
             Debug($"on GroundReset Timer {DateTime.Now}");
-            Reseter.RecordDataInWards();
             if(!ZNet.m_isServer) Player.m_localPlayer.Message(MessageHud.MessageType.TopLeft, $"<color=yellow>Подготовка к сбросу территории</color>");
         }
 
@@ -100,11 +99,15 @@ namespace GroundReset
         {
             _self.DebugPrivate(msg);
         }
+        public static void DebugError(string msg)
+        {
+            _self.DebugErrorPrivate(msg);
+        }
         private void DebugPrivate(string msg)
         {
             Logger.LogInfo(msg);
         }
-        public void DebugError(string msg)
+        private void DebugErrorPrivate(string msg)
         {
             Logger.LogError($"{msg} Write to the developer and moderator if this happens often.");
         }
