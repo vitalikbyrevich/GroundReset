@@ -1,6 +1,8 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using HarmonyLib;
 using UnityEngine;
 using static GroundReset.Plugin;
@@ -11,11 +13,28 @@ namespace GroundReset
     {
         static int key = "TCData".GetStableHashCode();
 
-        internal static void ResetAllTerrains()
+        internal static void ResetAllTerrains(bool checkIfNeed = false)
         {
-            TerrainComp.m_instances.ForEach(terrainComp => { ResetTerrainComp(terrainComp); });
-            TerrainComp.UpgradeTerrain();
+            Task.Run(() => TerrainComp.m_instances.ForEach(terrainComp =>
+            {
+                if(!checkIfNeed || IsNeedToReset(terrainComp))
+                    ResetTerrainComp(terrainComp);
+            }));
         }
+        internal static bool IsNeedToReset(TerrainComp terrainComp)
+        {
+            ZDO zdo = terrainComp.m_nview.GetZDO();
+            string json = zdo.GetString($"{ModName} time", "");
+            if (string.IsNullOrEmpty(json))
+            {
+                zdo.Set($"{ModName} time", DateTime.MinValue.ToString());
+                return false;
+            }
+
+            if (json == lastReset.ToString()) return false;
+            return true;
+        }
+
         internal static void ResetTerrainComp(TerrainComp terrainComp)
         {
             // var zdo = terrainComp.m_nview.GetZDO();
@@ -36,6 +55,7 @@ namespace GroundReset
             //         if (terrainComp.m_hmap.TerrainVSModifier(terrainModifier)) nview.Destroy();
             //     }
             // }
+            Debug($"ResetTerrainComp");
 
             int resets = 0;
             List<TerrainModifier> allInstances = TerrainModifier.GetAllInstances();
@@ -97,9 +117,11 @@ namespace GroundReset
                     thisResets++;
                     thisReset = true;
 
+                    var level = m_levelDelta[idx];
+                    var smooth = m_smoothDelta[idx];
                     m_modifiedHeight[idx] = false;
-                    m_levelDelta[idx] -= 0.5f;
-                    m_smoothDelta[idx] -= 0.5f;
+                    m_levelDelta[idx] = 0;
+                    m_smoothDelta[idx] = 0;
                 }
             }
 
@@ -228,19 +250,27 @@ namespace GroundReset
         //     }
         // }
 
-        public static IEnumerator WateForWards(TerrainComp terrainComp)
+        public static IEnumerator WateForWardsIEnumerator(TerrainComp terrainComp)
         {
             yield return new WaitForSeconds(15f);
 
             ResetTerrainComp(terrainComp);
-            Debug($"Terrain Reseted");
         }
+        public static IEnumerator ResetAllIEnumerator()
+        {
+            yield return new WaitForSeconds(35);
+
+            ResetAllTerrains(true);
+            _self.StartCoroutine(Reseter.ResetAllIEnumerator());
+        }
+
         public static Vector3 VertexToWorld(Heightmap heightmap, int x, int y)
         {
             float xPos = ((float)x - heightmap.m_width / 2) * heightmap.m_scale;
             float zPos = ((float)y - heightmap.m_width / 2) * heightmap.m_scale;
             return heightmap.transform.position + new Vector3(xPos, 0f, zPos);
         }
+
         private static float CoordDistance(float x, float y, float rx, float ry)
         {
             float num = x - rx;

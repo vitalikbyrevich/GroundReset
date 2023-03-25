@@ -11,23 +11,6 @@ namespace GroundReset
     [HarmonyPatch]
     internal class Patch
     {
-        [HarmonyPatch(typeof(TerrainComp), nameof(TerrainComp.Load)), HarmonyPrefix]
-        public static void TerrainLoad_ResetItsDataIfTimerCompleted(TerrainComp __instance, ref bool __result)
-        {
-            ZDO zdo = __instance.m_nview.GetZDO();
-            string json = zdo.GetString($"{ModName} time", "");
-            if (string.IsNullOrEmpty(json))
-            {
-                zdo.Set($"{ModName} time", DateTime.MinValue.ToString());
-                return;
-            }
-
-            if (json == lastReset.ToString()) return;
-
-            _self.StartCoroutine(Reseter.WateForWards(__instance));
-            Reseter.ResetTerrainComp(terrainComp: __instance);
-        }
-
         [HarmonyPatch(typeof(ZNetScene), nameof(ZNetScene.Awake)), HarmonyPostfix]
         public static void ZNetSceneAwake_StartTimer(ZNetScene __instance)
         {
@@ -41,6 +24,7 @@ namespace GroundReset
 
 
             FunctionTimer.Create(onTimer, time, "JF_GroundReset", true, true);
+            _self.StartCoroutine(Reseter.ResetAllIEnumerator());
         }
 
         [HarmonyPatch(typeof(ZNet), nameof(ZNet.OnDestroy)), HarmonyPostfix]
@@ -56,28 +40,5 @@ namespace GroundReset
         {
             ZRoutedRpc.instance.Register("ResetTerrain", new Action<long>(_self.RPC_ResetTerrain));
         }
-
-        // [HarmonyPatch(typeof(TerrainOp), nameof(TerrainOp.OnPlaced)), HarmonyPostfix]
-        // public static void TerrainOpOnPlaced(TerrainOp __instance)
-        // {
-        //     Reseter.RecordDataInWards();
-        // }
-        // [HarmonyPatch(typeof(PrivateArea), nameof(PrivateArea.Awake)), HarmonyPostfix]
-        // public static void PrivateAreaAwake(PrivateArea __instance)
-        // {
-        //     try
-        //     {
-        //         Reseter.LoadAreaOfWard(__instance);
-        //     }
-        //     catch (Exception e)
-        //     {
-        //         DebugError(e.ToString());
-        //     }
-        // }
-
-        //private static void FindWardOnPosition(Vector3 pos)
-        //{
-        //    PrivateArea.m_allAreas.Any(x => x.transform.position == pos);
-        //}
     }
 }

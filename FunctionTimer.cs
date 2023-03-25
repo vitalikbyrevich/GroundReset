@@ -72,7 +72,6 @@ namespace CodeMonkey.Utils
 
         public static FunctionTimer Create(Action action, float timer, string functionName, bool useUnscaledDeltaTime, bool stopAllWithSameName)
         {
-            return null;
             Plugin.Debug("Trying to create timer");
             if(!ZNet.m_isServer) return null;
             InitIfNeeded();

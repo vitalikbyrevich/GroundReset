@@ -17,7 +17,7 @@ namespace GroundReset
     public class Plugin : BaseUnityPlugin
     {
         #region values
-        internal const string ModName = "GroundReset", ModVersion = "1.0.5", ModGUID = "com.Frogger." + ModName;
+        internal const string ModName = "GroundReset", ModVersion = "1.0.6", ModGUID = "com.Frogger." + ModName;
         private static readonly Harmony harmony = new(ModGUID);
         public static Plugin _self;
         #endregion
@@ -58,7 +58,6 @@ namespace GroundReset
         internal static Action onTimer;
         internal static DateTime lastReset;
         internal static FunctionTimer timer;
-
 
         private void Awake()
         {
