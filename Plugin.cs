@@ -17,7 +17,7 @@ namespace GroundReset
     public class Plugin : BaseUnityPlugin
     {
         #region values
-        internal const string ModName = "GroundReset", ModVersion = "1.0.6", ModGUID = "com.Frogger." + ModName;
+        internal const string ModName = "GroundReset", ModVersion = "1.0.7", ModGUID = "com.Frogger." + ModName;
         private static readonly Harmony harmony = new(ModGUID);
         public static Plugin _self;
         #endregion
@@ -56,7 +56,7 @@ namespace GroundReset
         internal static float timePassedInMinutes;
         #endregion
         internal static Action onTimer;
-        internal static DateTime lastReset;
+        internal static DateTime lastReset = DateTime.MinValue;
         internal static FunctionTimer timer;
 
         private void Awake()
@@ -72,6 +72,8 @@ namespace GroundReset
             SetupWatcherOnConfigFile();
             Config.ConfigReloaded += (_, _) => { UpdateConfiguration(); };
             Config.SettingChanged += (_, _) => { UpdateConfiguration(); };
+            
+            _ = configSync.AddLockingConfigEntry(config("General", "Lock Configuration", true, ""));
             Config.SaveOnConfigSet = true;
             Config.Save();
             #endregion

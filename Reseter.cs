@@ -17,10 +17,16 @@ namespace GroundReset
         {
             Task.Run(() => TerrainComp.m_instances.ForEach(terrainComp =>
             {
-                if(!checkIfNeed || IsNeedToReset(terrainComp))
+                var flag = true;
+                if (checkIfNeed) flag = IsNeedToReset(terrainComp);
+                if (flag)
+                {
                     ResetTerrainComp(terrainComp);
+                    terrainComp.m_nview.GetZDO().Set($"{ModName} time", lastReset.ToString());
+                }
             }));
         }
+
         internal static bool IsNeedToReset(TerrainComp terrainComp)
         {
             ZDO zdo = terrainComp.m_nview.GetZDO();
@@ -31,7 +37,9 @@ namespace GroundReset
                 return false;
             }
 
-            if (json == lastReset.ToString()) return false;
+            var flag = json == lastReset.ToString();
+            if (flag) return false;
+            
             return true;
         }
 
@@ -55,7 +63,6 @@ namespace GroundReset
             //         if (terrainComp.m_hmap.TerrainVSModifier(terrainModifier)) nview.Destroy();
             //     }
             // }
-            Debug($"ResetTerrainComp");
 
             int resets = 0;
             List<TerrainModifier> allInstances = TerrainModifier.GetAllInstances();
@@ -65,7 +72,6 @@ namespace GroundReset
                 ZNetView nview = terrainModifier.GetComponent<ZNetView>();
                 if (nview != null && nview.IsValid())
                 {
-                    Debug($"TerrainModifier {position}");
                     resets++;
                     if (terrainComp.m_hmap.TerrainVSModifier(terrainModifier))
                         terrainComp.m_hmap.Poke(true);
@@ -73,7 +79,6 @@ namespace GroundReset
                 }
             }
 
-            Debug($"Reset {resets} mod edits");
 
             Traverse traverse = Traverse.Create(terrainComp);
 
@@ -90,7 +95,6 @@ namespace GroundReset
 
             int m_width = traverse.Field("m_width").GetValue<int>();
 
-            Debug($"Checking heightmap at {terrainComp.transform.position}");
             int thisResets = 0;
             bool thisReset = false;
             int num = m_width + 1;
@@ -105,13 +109,9 @@ namespace GroundReset
 
                     var inWard = PrivateArea.InsideFactionArea(VertexToWorld(terrainComp.m_hmap, w, h),
                         Character.Faction.Players);
-                    Debug(
-                        $"Player coord {x},{y} coord {w},{h}, distance {CoordDistance(x, y, w, h)} has edits, inWard {inWard}");
 
                     if (inWard)
                         continue;
-
-                    Debug("In range, resetting");
 
                     resets++;
                     thisResets++;
@@ -256,6 +256,7 @@ namespace GroundReset
 
             ResetTerrainComp(terrainComp);
         }
+
         public static IEnumerator ResetAllIEnumerator()
         {
             yield return new WaitForSeconds(35);
