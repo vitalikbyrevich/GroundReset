@@ -82,6 +82,7 @@
         <Compile Include="Reseter.cs" />
     </ItemGroup>
     <ItemGroup>
+      <Content Include="Build\GroundReset.dll" />
       <Content Include="ILRepack.targets" />
       <Content Include="README.md" />
     </ItemGroup>
