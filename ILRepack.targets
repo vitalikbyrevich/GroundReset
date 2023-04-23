@@ -3,8 +3,7 @@
 	<Target Name="ILRepacker" AfterTargets="Build">
 		<ItemGroup>
 			<InputAssemblies Include="$(TargetPath)"/>
-			<InputAssemblies Include="C:\Users\alex\source\repos\Valheim\_utils\Managers\ServerSync.dll"/>
-			<InputAssemblies Include="C:\Users\alex\source\repos\Valheim\_utils\fastJSON.dll"/>
+			<InputAssemblies Include="D:\Slava\Coding\Utils\ServerSync.dll"/>
 		</ItemGroup>
 		<ILRepack Parallel="true" DebugInfo="true" Internalize="true" InputAssemblies="@(InputAssemblies)"
                   OutputFile="$(TargetPath)" TargetKind="SameAsPrimaryAssembly" LibraryPath="$(OutputPath)"/>

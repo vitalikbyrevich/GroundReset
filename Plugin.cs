@@ -14,7 +14,7 @@ using UnityEngine.SceneManagement;
 namespace GroundReset
 {
     [BepInPlugin(ModGUID, ModName, ModVersion)]
-    public class Plugin : BaseUnityPlugin
+    public class Plugin : BaseUnityPlugin 
     {
         #region values
 

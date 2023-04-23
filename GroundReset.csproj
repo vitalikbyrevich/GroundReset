@@ -97,12 +97,9 @@
       </PropertyGroup>
       <Error Condition="!Exists('packages\ILRepack.Lib.MSBuild.Task.2.0.18.2\build\ILRepack.Lib.MSBuild.Task.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\ILRepack.Lib.MSBuild.Task.2.0.18.2\build\ILRepack.Lib.MSBuild.Task.targets'))" />
     </Target>
-    <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-         Other similar extension points exist, see Microsoft.Common.targets.
-    <Target Name="BeforeBuild">
+    <Target Name="CopyDLL" AfterTargets="ILRepack">
+        <Copy SourceFiles="$(TargetDir)$(ProjectName).dll" DestinationFolder="D:\Steam\steamapps\common\Valheim\BepInEx\plugins" />
+        <Copy SourceFiles="$(TargetDir)$(ProjectName).dll" DestinationFolder="D:\Steam\steamapps\common\Valheim dedicated server\BepInEx\plugins" />
+        <Copy SourceFiles="$(TargetDir)$(ProjectName).dll" DestinationFolder="D:\Slava\Coding\GroundReset\Build" />
     </Target>
-    <Target Name="AfterBuild">
-    </Target>
-    -->
-
 </Project>
