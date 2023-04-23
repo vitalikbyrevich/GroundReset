@@ -27,12 +27,11 @@ namespace GroundReset
             _self.StartCoroutine(Reseter.ResetAllIEnumerator());
         }
 
-        [HarmonyPatch(typeof(ZNet), nameof(ZNet.OnDestroy)), HarmonyPostfix]
-        public static void ZNet_OnShutdown()
+        [HarmonyPatch(typeof(ZNet), nameof(ZNet.Awake)), HarmonyPostfix]
+        public static void ZNet_OnShutdown(ZNet __instance)
         {
             if (!ZNet.m_isServer) return;
-
-            timePassedInMinutesConfig.Value = timer.Timer / 60;
+            __instance.StartCoroutine(Reseter.SaveTime());
         }
 
         [HarmonyPatch(typeof(ZNetScene), nameof(ZNetScene.Awake)), HarmonyPostfix]

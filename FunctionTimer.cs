@@ -17,42 +17,38 @@ using UnityEngine;
 
 namespace CodeMonkey.Utils
 {
-
     /*
      * Triggers a Action after a certain time 
      * */
     public class FunctionTimer
     {
-
         /*
          * Class to hook Actions into MonoBehaviour
          * */
         private class MonoBehaviourHook : MonoBehaviour
         {
-
             public Action OnUpdate;
 
             private void Update()
             {
                 OnUpdate?.Invoke();
             }
-
         }
 
 
         private static List<FunctionTimer> timerList; // Holds a reference to all active timers
-        private static GameObject initGameObject; // Global game object used for initializing class, is destroyed on scene change
+
+        private static GameObject
+            initGameObject; // Global game object used for initializing class, is destroyed on scene change
 
         private static void InitIfNeeded()
         {
-            if(initGameObject == null)
+            if (initGameObject == null)
             {
                 initGameObject = new GameObject("FunctionTimer_Global");
                 timerList = new List<FunctionTimer>();
             }
         }
-
-
 
 
         public static FunctionTimer Create(Action action, float timer)
@@ -70,13 +66,14 @@ namespace CodeMonkey.Utils
             return Create(action, timer, functionName, useUnscaledDeltaTime, false);
         }
 
-        public static FunctionTimer Create(Action action, float timer, string functionName, bool useUnscaledDeltaTime, bool stopAllWithSameName)
+        public static FunctionTimer Create(Action action, float timer, string functionName, bool useUnscaledDeltaTime,
+            bool stopAllWithSameName)
         {
             Plugin.Debug("Trying to create timer");
-            if(!ZNet.m_isServer) return null;
+            if (!ZNet.m_isServer) return null;
             InitIfNeeded();
 
-            if(stopAllWithSameName)
+            if (stopAllWithSameName)
             {
                 StopAllTimersWithName(functionName);
             }
@@ -100,12 +97,12 @@ namespace CodeMonkey.Utils
 
         public static void StopAllTimersWithName(string functionName)
         {
-            if(Plugin.timer != null && Plugin.timer.functionName == functionName) Plugin.timer = null;
+            if (Plugin.timer != null && Plugin.timer.functionName == functionName) Plugin.timer = null;
 
             InitIfNeeded();
-            for(int i = 0; i < timerList.Count; i++)
+            for (int i = 0; i < timerList.Count; i++)
             {
-                if(timerList[i].functionName == functionName)
+                if (timerList[i].functionName == functionName)
                 {
                     timerList[i].DestroySelf();
                     i--;
@@ -116,18 +113,15 @@ namespace CodeMonkey.Utils
         public static void StopFirstTimerWithName(string functionName)
         {
             InitIfNeeded();
-            for(int i = 0; i < timerList.Count; i++)
+            for (int i = 0; i < timerList.Count; i++)
             {
-                if(timerList[i].functionName == functionName)
+                if (timerList[i].functionName == functionName)
                 {
                     timerList[i].DestroySelf();
                     return;
                 }
             }
         }
-
-
-
 
 
         private GameObject gameObject;
@@ -137,8 +131,8 @@ namespace CodeMonkey.Utils
         private Action onEndAction;
 
 
-
-        public FunctionTimer(GameObject gameObject, Action action, float timer, string functionName, bool useUnscaledDeltaTime)
+        public FunctionTimer(GameObject gameObject, Action action, float timer, string functionName,
+            bool useUnscaledDeltaTime)
         {
             this.gameObject = gameObject;
             onEndAction = action;
@@ -149,7 +143,7 @@ namespace CodeMonkey.Utils
 
         private void Update()
         {
-            if(useUnscaledDeltaTime)
+            if (useUnscaledDeltaTime)
             {
                 Timer -= Time.unscaledDeltaTime;
             }
@@ -157,7 +151,8 @@ namespace CodeMonkey.Utils
             {
                 Timer -= Time.deltaTime;
             }
-            if(Timer <= 0)
+
+            if (Timer <= 0)
             {
                 // Timer complete, trigger Action
                 onEndAction();
@@ -168,13 +163,11 @@ namespace CodeMonkey.Utils
         private void DestroySelf()
         {
             RemoveTimer(this);
-            if(gameObject != null)
+            if (gameObject != null)
             {
                 UnityEngine.Object.Destroy(gameObject);
             }
         }
-
-
 
 
         /*
@@ -182,7 +175,6 @@ namespace CodeMonkey.Utils
          * */
         public class FunctionTimerObject
         {
-
             private float timer;
             private Action callback;
 
@@ -200,7 +192,7 @@ namespace CodeMonkey.Utils
             public bool Update(float deltaTime)
             {
                 timer -= deltaTime;
-                if(timer <= 0)
+                if (timer <= 0)
                 {
                     callback();
                     return true;
@@ -217,7 +209,5 @@ namespace CodeMonkey.Utils
         {
             return new FunctionTimerObject(callback, timer);
         }
-
     }
-
 }
