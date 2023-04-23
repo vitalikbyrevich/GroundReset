@@ -179,9 +179,10 @@ namespace GroundReset
 
         public static IEnumerator SaveTime()
         {
-            yield return new WaitForSeconds(60);
+            yield return new WaitForSeconds(savedTimeUpdateInterval);
 
             timePassedInMinutesConfig.Value = timer.Timer / 60;
+            ZNetScene.instance.StartCoroutine(SaveTime());
         }
     }
 }

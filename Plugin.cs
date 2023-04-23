@@ -68,9 +68,11 @@ namespace GroundReset
         internal static ConfigEntry<float> timeInMinutesConfig;
         internal static ConfigEntry<float> timePassedInMinutesConfig;
         internal static ConfigEntry<float> fuckingBugDistanceConfig;
+        internal static ConfigEntry<float> savedTimeUpdateIntervalConfig;
         internal static float timeInMinutes = -1;
         internal static float timePassedInMinutes;
         internal static float fuckingBugDistance;
+        internal static float savedTimeUpdateInterval;
 
         #endregion
 
@@ -88,7 +90,8 @@ namespace GroundReset
 
             _ = configSync.AddLockingConfigEntry(config("General", "Lock Configuration", true, ""));
             timeInMinutesConfig = config("General", "TheTriggerTime", 4320f, "");
-            fuckingBugDistanceConfig = config("General", "Fucking Bug Distance", 100f, "");
+            fuckingBugDistanceConfig = config("General", "Fucking Bug Distance", 115f, "");
+            savedTimeUpdateIntervalConfig = config("General", "SavedTime Update Interval (seconds)", 120f, "");
             timePassedInMinutesConfig = config("DO NOT TOUCH", "time has passed since the last trigger", 0f,
                 description: new ConfigDescription("", null,
                     new ConfigurationManagerAttributes() { Browsable = false }));
@@ -107,7 +110,7 @@ namespace GroundReset
             harmony.PatchAll();
         }
 
-        public void RPC_ResetTerrain(long @long)
+        public void RPC_ResetTerrain(long _)
         {
             lastReset = DateTime.Now;
             FunctionTimer.Create(onTimer, timeInMinutes * 60, "JF_GroundReset", true, true);
@@ -188,6 +191,7 @@ namespace GroundReset
                 timeInMinutes = timeInMinutesConfig.Value;
                 timePassedInMinutes = timePassedInMinutesConfig.Value;
                 fuckingBugDistance = fuckingBugDistanceConfig.Value;
+                savedTimeUpdateInterval = savedTimeUpdateIntervalConfig.Value;
             });
 
             Task.WaitAll();

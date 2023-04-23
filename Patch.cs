@@ -37,6 +37,7 @@ namespace GroundReset
         [HarmonyPatch(typeof(ZNetScene), nameof(ZNetScene.Awake)), HarmonyPostfix]
         public static void ZNetSceneAwake()
         {
+            if (SceneManager.GetActiveScene().name!= "main") return;
             ZRoutedRpc.instance.Register("ResetTerrain", new Action<long>(_self.RPC_ResetTerrain));
         }
     }
