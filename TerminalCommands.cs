@@ -24,14 +24,17 @@ public static class TerminalCommands
                         return;
                     }
 
-                    if (args.Length == 2 && args[1] == "ResetAllTerrains")
+                    if (args.Length == 4 && args[1] == "ResetNearestTerrains")
                     {
-                        Reseter.ResetAllTerrains();
+                        Reseter.ResetAllTerrains(false, bool.Parse(args[2]), bool.Parse(args[3]));
                     }
 
-                    args.Context.AddString("ResetAllTerrains");
+                    args.Context.AddString("ResetNearestTerrains [check wards] [chack zones]");
                 },
-                optionsFetcher: () => new List<string> { "ResetAllTerrains" });
+                optionsFetcher: () => new List<string>
+                {
+                    "ResetNearestTerrains true true", "ResetNearestTerrains true false", "ResetNearestTerrains false true", "ResetNearestTerrains false false"
+                });
         }
     }
 }

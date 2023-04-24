@@ -14,7 +14,7 @@ namespace GroundReset
     {
         static int key = "TCData".GetStableHashCode();
 
-        internal static void ResetAllTerrains(bool checkIfNeed = false)
+        internal static void ResetAllTerrains(bool checkIfNeed = false, bool checkWards = true, bool checkZones = true)
         {
             Task.Run(() => TerrainComp.m_instances.ForEach(terrainComp =>
             {
@@ -22,7 +22,7 @@ namespace GroundReset
                 if (checkIfNeed) flag = IsNeedToReset(terrainComp);
                 if (flag)
                 {
-                    ResetTerrainComp(terrainComp);
+                    ResetTerrainComp(terrainComp, checkWards, checkZones);
                     terrainComp.m_nview.GetZDO().Set($"{ModName} time", lastReset.ToString());
                 }
             }));
@@ -44,7 +44,7 @@ namespace GroundReset
             return true;
         }
 
-        internal static void ResetTerrainComp(TerrainComp terrainComp)
+        internal static void ResetTerrainComp(TerrainComp terrainComp, bool checkWards = true, bool checkZones = true)
         {
             int resets = 0;
             List<TerrainModifier> allInstances = TerrainModifier.GetAllInstances();
@@ -90,15 +90,16 @@ namespace GroundReset
                     var vertexToWorld = VertexToWorld(terrainComp.m_hmap, w, h);
                     if (Utils.DistanceXZ(Player.m_localPlayer.transform.position, vertexToWorld) >= fuckingBugDistance)
                         continue;
+                    
                     var inWard = PrivateArea.InsideFactionArea(vertexToWorld,
                         Character.Faction.Players);
-                    if (inWard)
+                    if (inWard && checkWards)
                         continue;
                     var inZone = Market_API.Marketplace_API.IsPointInsideTerritoryWithFlag(vertexToWorld,
                         Marketplace_API.TerritoryFlags.NoPickaxe, out string name,
                         out Marketplace_API.TerritoryFlags flags,
                         out Marketplace_API.AdditionalTerritoryFlags additionalFlags);
-                    if (inZone)
+                    if (inZone && checkZones)
                         continue;
 
                     resets++;
@@ -128,13 +129,13 @@ namespace GroundReset
                         continue;
                     var inWard = PrivateArea.InsideFactionArea(vertexToWorld,
                         Character.Faction.Players);
-                    if (inWard)
+                    if (inWard && checkWards)
                         continue;
                     var inZone = Market_API.Marketplace_API.IsPointInsideTerritoryWithFlag(vertexToWorld,
                         Marketplace_API.TerritoryFlags.NoPickaxe, out string name,
                         out Marketplace_API.TerritoryFlags flags,
                         out Marketplace_API.AdditionalTerritoryFlags additionalFlags);
-                    if (inZone)
+                    if (inZone && checkZones)
                         continue;
 
 
