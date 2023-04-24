@@ -52,6 +52,9 @@
         <Reference Include="BepInEx">
           <HintPath>..\..\..\Steam\steamapps\common\Valheim\BepInEx\core\BepInEx.dll</HintPath>
         </Reference>
+        <Reference Include="kg.Marketplace">
+          <HintPath>..\Utils\kg.Marketplace.dll</HintPath>
+        </Reference>
         <Reference Include="ServerSync">
           <HintPath>..\Utils\ServerSync.dll</HintPath>
         </Reference>
@@ -76,6 +79,7 @@
         <Compile Include="ConfigurationManagerAttributes.cs" />
         <Compile Include="FunctionTimer.cs" />
         <Compile Include="FunctionUpdater.cs" />
+        <Compile Include="Marketplace_API.cs" />
         <Compile Include="Patch.cs" />
         <Compile Include="Plugin.cs" />
         <Compile Include="Properties\AssemblyInfo.cs" />

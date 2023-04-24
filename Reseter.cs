@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using HarmonyLib;
+using Market_API;
 using UnityEngine;
 using static GroundReset.Plugin;
 
@@ -92,6 +93,12 @@ namespace GroundReset
                     var inWard = PrivateArea.InsideFactionArea(vertexToWorld,
                         Character.Faction.Players);
                     if (inWard)
+                        continue;
+                    var inZone = Market_API.Marketplace_API.IsPointInsideTerritoryWithFlag(vertexToWorld,
+                        Marketplace_API.TerritoryFlags.NoPickaxe, out string name,
+                        out Marketplace_API.TerritoryFlags flags,
+                        out Marketplace_API.AdditionalTerritoryFlags additionalFlags);
+                    if (inZone)
                         continue;
 
                     resets++;
