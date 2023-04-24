@@ -130,6 +130,13 @@ namespace GroundReset
                         Character.Faction.Players);
                     if (inWard)
                         continue;
+                    var inZone = Market_API.Marketplace_API.IsPointInsideTerritoryWithFlag(vertexToWorld,
+                        Marketplace_API.TerritoryFlags.NoPickaxe, out string name,
+                        out Marketplace_API.TerritoryFlags flags,
+                        out Marketplace_API.AdditionalTerritoryFlags additionalFlags);
+                    if (inZone)
+                        continue;
+
 
                     thisReset = true;
                     m_modifiedPaint[idx] = false;
