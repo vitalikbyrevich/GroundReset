@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Compatibility.WardIsLove;
 using HarmonyLib;
 using Market_API;
 using UnityEngine;
@@ -12,8 +13,6 @@ namespace GroundReset
 {
     internal static class Reseter
     {
-        static int key = "TCData".GetStableHashCode();
-
         internal static void ResetAllTerrains(bool checkIfNeed = false, bool checkWards = true, bool checkZones = true)
         {
             Task.Run(() => TerrainComp.m_instances.ForEach(terrainComp =>
@@ -90,17 +89,39 @@ namespace GroundReset
                     var vertexToWorld = VertexToWorld(terrainComp.m_hmap, w, h);
                     if (Utils.DistanceXZ(Player.m_localPlayer.transform.position, vertexToWorld) >= fuckingBugDistance)
                         continue;
-                    
+
                     var inWard = PrivateArea.InsideFactionArea(vertexToWorld,
                         Character.Faction.Players);
                     if (inWard && checkWards)
                         continue;
-                    var inZone = Market_API.Marketplace_API.IsPointInsideTerritoryWithFlag(vertexToWorld,
-                        Marketplace_API.TerritoryFlags.NoPickaxe, out string name,
-                        out Marketplace_API.TerritoryFlags flags,
-                        out Marketplace_API.AdditionalTerritoryFlags additionalFlags);
-                    if (inZone && checkZones)
-                        continue;
+                    if (Marketplace_API.IsInstalled())
+                    {
+                        var inZone = Marketplace_API.IsPointInsideTerritoryWithFlag(vertexToWorld,
+                            Marketplace_API.TerritoryFlags.NoPickaxe, out string name,
+                            out Marketplace_API.TerritoryFlags flags,
+                            out Marketplace_API.AdditionalTerritoryFlags additionalFlags);
+                        if (inZone && checkZones)
+                            continue;
+                    }
+
+                    if (WardIsLovePlugin.IsLoaded())
+                    {
+                        bool inWardIsLoveWard = false;
+                        if (WardIsLovePlugin.WardEnabled().Value &&
+                            WardMonoscript.CheckInWardMonoscript(vertexToWorld))
+                        {
+                            var ward = WardMonoscriptExt.GetWardMonoscript(vertexToWorld);
+                            if (ward != null)
+                            {
+                                inWardIsLoveWard =
+                                    !WardMonoscript.CheckAccess(vertexToWorld, ward.GetWardRadius(), false);
+                            }
+                        }
+
+                        if (inWardIsLoveWard && checkWards)
+                            continue;
+                    }
+
 
                     resets++;
                     thisResets++;
@@ -131,12 +152,33 @@ namespace GroundReset
                         Character.Faction.Players);
                     if (inWard && checkWards)
                         continue;
-                    var inZone = Market_API.Marketplace_API.IsPointInsideTerritoryWithFlag(vertexToWorld,
-                        Marketplace_API.TerritoryFlags.NoPickaxe, out string name,
-                        out Marketplace_API.TerritoryFlags flags,
-                        out Marketplace_API.AdditionalTerritoryFlags additionalFlags);
-                    if (inZone && checkZones)
-                        continue;
+                    if (Marketplace_API.IsInstalled())
+                    {
+                        var inZone = Marketplace_API.IsPointInsideTerritoryWithFlag(vertexToWorld,
+                            Marketplace_API.TerritoryFlags.NoPickaxe, out string name,
+                            out Marketplace_API.TerritoryFlags flags,
+                            out Marketplace_API.AdditionalTerritoryFlags additionalFlags);
+                        if (inZone && checkZones)
+                            continue;
+                    }
+
+                    if (WardIsLovePlugin.IsLoaded())
+                    {
+                        bool inWardIsLoveWard = false;
+                        if (WardIsLovePlugin.WardEnabled().Value &&
+                            WardMonoscript.CheckInWardMonoscript(vertexToWorld))
+                        {
+                            var ward = WardMonoscriptExt.GetWardMonoscript(vertexToWorld);
+                            if (ward != null)
+                            {
+                                inWardIsLoveWard =
+                                    !WardMonoscript.CheckAccess(vertexToWorld, ward.GetWardRadius(), false);
+                            }
+                        }
+
+                        if (inWardIsLoveWard && checkWards)
+                            continue;
+                    }
 
 
                     thisReset = true;

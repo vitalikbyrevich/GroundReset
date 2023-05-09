@@ -18,7 +18,7 @@ namespace GroundReset
     {
         #region values
 
-        internal const string ModName = "GroundReset", ModVersion = "1.0.7", ModGUID = "com.Frogger." + ModName;
+        internal const string ModName = "GroundReset", ModVersion = "1.0.8", ModGUID = "com.Frogger." + ModName;
         private static readonly Harmony harmony = new(ModGUID);
         public static Plugin _self;
 

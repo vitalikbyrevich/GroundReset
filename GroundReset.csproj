@@ -52,9 +52,6 @@
         <Reference Include="BepInEx">
           <HintPath>..\..\..\Steam\steamapps\common\Valheim\BepInEx\core\BepInEx.dll</HintPath>
         </Reference>
-        <Reference Include="kg.Marketplace">
-          <HintPath>..\Utils\kg.Marketplace.dll</HintPath>
-        </Reference>
         <Reference Include="ServerSync">
           <HintPath>..\Utils\ServerSync.dll</HintPath>
         </Reference>
@@ -85,6 +82,11 @@
         <Compile Include="Properties\AssemblyInfo.cs" />
         <Compile Include="Reseter.cs" />
         <Compile Include="TerminalCommands.cs" />
+        <Compile Include="WardIsLove\CustomCheck.cs" />
+        <Compile Include="WardIsLove\ModCompat.cs" />
+        <Compile Include="WardIsLove\WardIsLovePlugin.cs" />
+        <Compile Include="WardIsLove\WardMonoscript.cs" />
+        <Compile Include="WardIsLove\WardMonoscriptExt.cs" />
     </ItemGroup>
     <ItemGroup>
       <Content Include="Build\GroundReset.dll" />
