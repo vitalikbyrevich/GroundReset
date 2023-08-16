@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Compatibility.WardIsLove;
-using HarmonyLib;
 using Market_API;
 using UnityEngine;
 using static GroundReset.Plugin;
@@ -15,16 +13,23 @@ namespace GroundReset
     {
         internal static void ResetAllTerrains(bool checkIfNeed = false, bool checkWards = true, bool checkZones = true)
         {
-            Task.Run(() => TerrainComp.m_instances.ForEach(terrainComp =>
+            var task = Task.Run(async () =>
             {
-                var flag = true;
-                if (checkIfNeed) flag = IsNeedToReset(terrainComp);
-                if (flag)
+                var resets = 0;
+                TerrainComp.s_instances.ForEach(terrainComp =>
                 {
-                    ResetTerrainComp(terrainComp, checkWards, checkZones);
-                    terrainComp.m_nview.GetZDO().Set($"{ModName} time", lastReset.ToString());
-                }
-            }));
+                    var flag = true;
+                    if (checkIfNeed) flag = IsNeedToReset(terrainComp);
+                    if (flag)
+                    {
+                        ResetTerrainComp(terrainComp, checkWards, checkZones);
+                        terrainComp.m_nview.GetZDO().Set($"{ModName} time", lastReset.ToString());
+                        resets++;
+                    }
+                });
+
+                if (resets > 0) Log($"Сброшено {resets} чанков в видимой области");
+            });
         }
 
         internal static bool IsNeedToReset(TerrainComp terrainComp)
@@ -64,7 +69,7 @@ namespace GroundReset
             if (!terrainComp.m_initialized)
                 return;
 
-            terrainComp.m_hmap.WorldToVertex(terrainComp.m_hmap.GetCenter(), out int x, out int y);
+            terrainComp.m_hmap.WorldToVertex(terrainComp.m_hmap.m_bounds.center, out int x, out int y);
 
             bool[] m_modifiedHeight = terrainComp.m_modifiedHeight;
             float[] m_levelDelta = terrainComp.m_levelDelta;
@@ -217,7 +222,7 @@ namespace GroundReset
             yield return new WaitForSeconds(35);
 
             ResetAllTerrains(true);
-            _self.StartCoroutine(Reseter.ResetAllIEnumerator());
+            _self.StartCoroutine(ResetAllIEnumerator());
         }
 
         public static Vector3 VertexToWorld(Heightmap heightmap, int x, int y)

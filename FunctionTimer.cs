@@ -10,10 +10,11 @@
     --------------------------------------------------
  */
 
-using GroundReset;
 using System;
 using System.Collections.Generic;
+using GroundReset;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace CodeMonkey.Utils
 {
@@ -69,7 +70,7 @@ namespace CodeMonkey.Utils
         public static FunctionTimer Create(Action action, float timer, string functionName, bool useUnscaledDeltaTime,
             bool stopAllWithSameName)
         {
-            Plugin.Debug("Trying to create timer");
+            Plugin.Log("Trying to create timer");
             if (!ZNet.m_isServer) return null;
             InitIfNeeded();
 
@@ -85,7 +86,7 @@ namespace CodeMonkey.Utils
             timerList.Add(funcTimer);
 
             Plugin.timer = funcTimer;
-            Plugin.Debug($"Timer 'JF_GroundReset' was sucsesfully created. Timer interwal was seted to {timer}");
+            Plugin.Log($"Timer 'JF_GroundReset' was sucsesfully created. Timer interwal was seted to {timer}");
             return funcTimer;
         }
 
@@ -165,7 +166,7 @@ namespace CodeMonkey.Utils
             RemoveTimer(this);
             if (gameObject != null)
             {
-                UnityEngine.Object.Destroy(gameObject);
+                Object.Destroy(gameObject);
             }
         }
 

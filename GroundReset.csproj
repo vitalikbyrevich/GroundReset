@@ -89,7 +89,6 @@
         <Compile Include="WardIsLove\WardMonoscriptExt.cs" />
     </ItemGroup>
     <ItemGroup>
-      <Content Include="Build\GroundReset.dll" />
       <Content Include="ILRepack.targets" />
       <Content Include="README.md" />
     </ItemGroup>
@@ -108,6 +107,5 @@
     <Target Name="CopyDLL" AfterTargets="ILRepack">
         <Copy SourceFiles="$(TargetDir)$(ProjectName).dll" DestinationFolder="D:\Steam\steamapps\common\Valheim\BepInEx\plugins" />
         <Copy SourceFiles="$(TargetDir)$(ProjectName).dll" DestinationFolder="D:\Steam\steamapps\common\Valheim dedicated server\BepInEx\plugins" />
-        <Copy SourceFiles="$(TargetDir)$(ProjectName).dll" DestinationFolder="D:\Slava\Coding\GroundReset\Build" />
     </Target>
 </Project>

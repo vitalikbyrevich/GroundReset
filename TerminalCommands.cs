@@ -18,22 +18,30 @@ public static class TerminalCommands
             _ = new Terminal.ConsoleCommand(modName, $"Manages the {modName.Replace(".", "")} commands.",
                 args =>
                 {
-                    if (!Plugin.configSync.IsAdmin && !ZNet.instance.IsServer())
+                    try
                     {
-                        args.Context.AddString("You are not an admin on this server.");
-                        return;
-                    }
+                        if (!ZNet.instance) return;
+                        if (!Plugin.configSync.IsAdmin && !ZNet.instance.IsServer())
+                        {
+                            args.Context.AddString("You are not an admin on this server.");
+                            return;
+                        }
 
-                    if (args.Length == 4 && args[1] == "ResetNearestTerrains")
+                        if (args.Length == 4 && args[1] == "ResetNearestTerrains")
+                            Reseter.ResetAllTerrains(false, bool.Parse(args[2]), bool.Parse(args[3]));
+
+                        args.Context.AddString("ResetNearestTerrains [check wards] [chack zones]");
+                    }
+                    catch (Exception e)
                     {
-                        Reseter.ResetAllTerrains(false, bool.Parse(args[2]), bool.Parse(args[3]));
+                        Plugin.DebugError(e);
+                        throw;
                     }
-
-                    args.Context.AddString("ResetNearestTerrains [check wards] [chack zones]");
                 },
                 optionsFetcher: () => new List<string>
                 {
-                    "ResetNearestTerrains true true", "ResetNearestTerrains true false", "ResetNearestTerrains false true", "ResetNearestTerrains false false"
+                    "ResetNearestTerrains true true", "ResetNearestTerrains true false",
+                    "ResetNearestTerrains false true", "ResetNearestTerrains false false"
                 });
         }
     }
