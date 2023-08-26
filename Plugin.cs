@@ -115,8 +115,11 @@ public class Plugin : BaseUnityPlugin
         Config.Reload();
         Log($"Подготовка к сбросу территории {DateTime.Now}");
         if (!ZNet.m_isServer)
-            Player.m_localPlayer.Message(MessageHud.MessageType.TopLeft,
-                $"<color=yellow>Подготовка к сбросу территории</color>");
+            ZRoutedRpc.instance.InvokeRoutedRPC(ZRoutedRpc.Everybody, "ShowMessage", new object[]
+            {
+                (int)MessageHud.MessageType.TopLeft,
+                "<color=yellow><size=30>Подготовка к восстановлению ландшафта</size></color>"
+            });
     }
 
     #region tools
