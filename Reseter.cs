@@ -28,7 +28,14 @@ namespace GroundReset
                     }
                 });
 
-                if (resets > 0) Log($"Сброшено {resets} чанков в видимой области");
+                if (resets > 0) { 
+                    Log($"Восстановлено {resets} места в пределах видимости");
+                    ZRoutedRpc.instance.InvokeRoutedRPC(ZRoutedRpc.Everybody, "ShowMessage", new object[]
+                    {
+                (int)MessageHud.MessageType.TopLeft,
+                "<color=yellow><size=30>Восстановлено "+resets+" места в пределах видимости</size></color>"
+                    });
+                }
             });
         }
 
